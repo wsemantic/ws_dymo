@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <template id="report_simple_label_dymo" name="Report Label Dymo" inherit_id="product.report_simple_label_dymo">
+        <xpath expr="//div[hasclass('o_label_full')]" position="replace">
+            <div class="o_label_full" t-att-style="table_style">
+                <div class="text-start o_label_small_barcode">
+                    <t t-if="barcode">
+                        <!-- `quiet=0` to remove the left and right margins on the barcode -->
+                        <div t-out="barcode" style="padding:0" t-options="{'widget': 'barcode', 'quiet': 0, 'symbology': 'auto', 'img_style': barcode_size}"/>
+                        <div class="o_label_name" style="line-height: 100%;background-color: transparent;">
+                            <span class="product_barcode" t-out="barcode"/>
+                            <span class="product_barcode_name" t-if="product.is_product_variant" t-field="product.name"/>
+                            <span class="product_barcode_name" t-else="" t-field="product.name"/>
+                        </div>
+                    </t>
+                </div>
+                <div t-if="not barcode" class="o_label_name" style="line-height: 100%;background-color: transparent;padding-top: 1px;">
+                    <span t-if="product.is_product_variant" t-field="product.display_name"/>
+                    <span t-else="" t-field="product.name"/>
+                </div>
+                <div class="o_label_left_column" style="line-height: 100%;background-color: transparent;">
+                    <!-- <small class="text-nowrap" t-field="product.default_code"/> -->
+                    <t t-if="product.is_product_variant">
+                        <t t-if="product.product_template_variant_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'color')">
+                            <span class="attrib_val_color" t-field="product.product_template_variant_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'color')[0].name" />
+                        </t>
+                        <t t-if="product.product_template_variant_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')">
+                            <span class="attrib_val_size" t-field="product.product_template_variant_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')[0].name" />
+                        </t>
+                    </t>
+                </div>
+                <div class="text-end" style="padding-top: 10px;">
+                    <t t-if="product.is_product_variant">
+                        <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}"/>
+                    </t>
+                    <t t-else="">
+                        <strong class="o_label_price_medium" t-field="product.list_price" t-options="{'widget': 'monetary', 'label_price': True}"/>
+                    </t>
+                    <div t-if="False" class="o_label_extra_data">
+                        <t t-out="extra_html"/>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>
