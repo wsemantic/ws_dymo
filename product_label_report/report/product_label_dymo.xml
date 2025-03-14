@@ -21,11 +21,11 @@
                 <div class="o_label_left_column" style="line-height: 100%;background-color: transparent;">
                     <!-- <small class="text-nowrap" t-field="product.default_code"/> -->
                     <t t-if="product.is_product_variant">
-                        <t t-if="product.product_template_variant_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'color')">
-                            <span class="attrib_val_color" t-field="product.product_template_variant_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'color')[0].name" />
+                        <t t-if="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'color')">
+                            <span class="attrib_val_color" t-field="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'color')[0].name" />
                         </t>
-                        <t t-if="product.product_template_variant_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')">
-                            <span class="attrib_val_size" t-field="product.product_template_variant_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')[0].name" />
+                        <t t-if="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')">
+                            <span class="attrib_val_size" t-field="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')[0].name" />
                         </t>
                     </t>
                 </div>
