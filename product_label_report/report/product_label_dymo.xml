@@ -5,40 +5,46 @@
             <div class="o_label_full" t-att-style="table_style">
                 <div class="text-start o_label_small_barcode">
                     <t t-if="barcode">
-                        <!-- `quiet=0` to remove the left and right margins on the barcode -->
                         <div t-out="barcode" style="padding:0" t-options="{'widget': 'barcode', 'quiet': 0, 'symbology': 'auto', 'img_style': barcode_size}"/>
-                        <div class="o_label_name" style="line-height: 100%;background-color: transparent;">
+                        <div class="o_label_name" style="line-height: 100%; background-color: transparent;">
                             <span class="product_barcode" t-out="barcode"/>
                             <span class="product_barcode_name" t-if="product.is_product_variant" t-field="product.name"/>
                             <span class="product_barcode_name" t-else="" t-field="product.name"/>
                         </div>
                     </t>
                 </div>
-                <div t-if="not barcode" class="o_label_name" style="line-height: 100%;background-color: transparent;padding-top: 1px;">
+                <!-- Product Name Fallback (if no barcode) -->
+                <div t-if="not barcode" class="o_label_name" style="line-height: 100%; background-color: transparent; padding-top: 1px;">
                     <span t-if="product.is_product_variant" t-field="product.display_name"/>
                     <span t-else="" t-field="product.name"/>
                 </div>
-                <div class="o_label_left_column" style="line-height: 100%;background-color: transparent;">
-                    <!-- <small class="text-nowrap" t-field="product.default_code"/> -->
-                    <t t-if="product.is_product_variant">
-                        <t t-if="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'color')">
-                            <span class="attrib_val_color" t-field="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'color')[0].name" />
-                        </t>
-                        <t t-if="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')">
-                            <span class="attrib_val_size" t-field="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')[0].name" />
-                        </t>
-                    </t>
-                </div>
-                <div class="text-end" style="padding-top: 10px;">
-                    <t t-if="product.is_product_variant">
-                        <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}"/>
-                    </t>
-                    <t t-else="">
-                        <strong class="o_label_price_medium" t-field="product.list_price" t-options="{'widget': 'monetary', 'label_price': True}"/>
-                    </t>
-                    <div t-if="False" class="o_label_extra_data">
-                        <t t-out="extra_html"/>
-                    </div>
+                <table style="width: 100%; padding-top: 10px; border: 1px solid white; border-collapse: collapse;" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td style="border: 1px solid white; text-align: left;">
+                            <!-- Color and Size inline -->
+                            <div style="display: inline-block;">
+                                <t t-if="product.is_product_variant and product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'color')">
+                                    <t t-set="color_val" t-value="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'color')[0].name"/>
+                                    <span t-attf-style="display: inline-block; max-width: 120px; word-wrap: break-word; font-size: #{'95' if len(color_val) &lt;= 10 else '85' if len(color_val) &lt;= 15 else '80'}%;" t-esc="color_val"/>
+                                </t>
+                                <t t-if="product.is_product_variant and product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')">
+                                    <span style="display: inline-block; margin-left: 0.5em; white-space: nowrap;" t-field="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')[0].name"/>
+                                </t>
+                            </div>
+                        </td>
+                        <td style="border: 1px solid white; text-align: right; white-space: nowrap;">
+                            <t t-if="product.is_product_variant">
+                                <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.2em;"/>
+                            </t>
+                            <t t-else="">
+                                <strong class="o_label_price_medium" t-field="product.list_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.2em;"/>
+                            </t>
+                        </td>
+                    </tr>
+                </table>
+                <!-- Optional Extra HTML (currently disabled) -->
+                <div t-if="False" class="o_label_extra_data">
+                    <t t-out="extra_html"/>
                 </div>
             </div>
         </xpath>
