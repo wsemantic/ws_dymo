@@ -25,10 +25,10 @@
                             <div style="display: inline-block;">
                                 <t t-if="product.is_product_variant and product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'color')">
                                     <t t-set="color_val" t-value="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'color')[0].name"/>
-                                    <span t-attf-style="display: inline-block; max-width: 120px; word-wrap: break-word; font-size: #{'95' if len(color_val) &lt;= 10 else '85' if len(color_val) &lt;= 15 else '80'}%;" t-esc="color_val"/>
+                                    <span t-attf-style="display: inline-block; max-width: 120px; word-wrap: break-word; font-size: #{'100' if len(color_val) &lt;= 10 else '87' if len(color_val) &lt;= 15 else '78'}%;" t-esc="color_val"/>
                                 </t>
                                 <t t-if="product.is_product_variant and product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')">
-                                    <span style="display: inline-block; margin-left: 0.5em; white-space: nowrap;" t-field="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')[0].name"/>
+                                    <span style="display: inline-block; margin-left: 0.5em; white-space: nowrap;font-size: 1.3em;" t-field="product.product_template_attribute_value_ids.filtered(lambda l: l.attribute_id.attribute_type == 'size')[0].name"/>
                                 </t>
                             </div>
                         </td>
