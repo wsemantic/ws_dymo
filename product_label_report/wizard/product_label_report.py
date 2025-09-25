@@ -16,13 +16,25 @@ def _prepare_custom_data(env, data):
         raise UserError(_('Product model not defined, Please contact your administrator.'))
 
     total = 0
-    qty_by_product_in = data.get('quantity_by_product')
+    qty_by_product_in = data.get('quantity_by_product') or {}
     # search for products all at once, ordered by name desc since popitem() used in xml to print the labels
     # is LIFO, which results in ordering by product name in the report
-    products = Product.search([('id', 'in', [int(p) for p in qty_by_product_in.keys()])], order='name asc, barcode asc')
+    product_ids = [int(p) for p in qty_by_product_in.keys()]
+    if not product_ids:
+        product_ids = [int(p) for p in data.get('product_ids', [])] or [int(p) for p in data.get('product_tmpl_ids', [])]
+    products = Product.search([('id', 'in', product_ids)], order='name asc, barcode asc') if product_ids else Product.browse()
     quantity_by_product = defaultdict(list)
+    layout_wizard = env['product.label.layout'].browse(data.get('layout_wizard'))
+    if not layout_wizard:
+        return {}
+    use_stock_quantity = layout_wizard.use_stock_quantity if layout_wizard else False
     for product in products:
-        q = qty_by_product_in[str(product.id)]
+        if use_stock_quantity:
+            q = layout_wizard._get_product_stock_quantity(product)
+        else:
+            q = qty_by_product_in.get(str(product.id), 0)
+        if q <= 0:
+            continue
         quantity_by_product[product].append((product.barcode, q))
         total += q
     if data.get('custom_barcodes'):
@@ -30,10 +42,6 @@ def _prepare_custom_data(env, data):
         for product, barcodes_qtys in data.get('custom_barcodes').items():
             quantity_by_product[Product.browse(int(product))] += (barcodes_qtys)
             total += sum(qty for _, qty in barcodes_qtys)
-
-    layout_wizard = env['product.label.layout'].browse(data.get('layout_wizard'))
-    if not layout_wizard:
-        return {}
 
     return {
         'quantity': quantity_by_product,
