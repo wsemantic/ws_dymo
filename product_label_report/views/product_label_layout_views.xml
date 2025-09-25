@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="product_label_layout_view_form_stock_quantity" model="ir.ui.view">
+        <field name="name">product.label.layout.stock.quantity.form</field>
+        <field name="model">product.label.layout</field>
+        <field name="inherit_id" ref="product.product_label_layout_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='print_format']" position="after">
+                <field name="use_stock_quantity" />
+                <field name="warehouse_id"
+                       attrs="{'required': [('use_stock_quantity', '=', True)],
+                                'invisible': [('use_stock_quantity', '=', False)]}" />
+            </xpath>
+            <xpath expr="//field[@name='quantity']" position="attributes">
+                <attribute name="required">0</attribute>
+                <attribute name="attrs">{'readonly': [('use_stock_quantity', '=', True)],
+                                         'required': [('use_stock_quantity', '=', False)]}</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

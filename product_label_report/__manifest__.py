@@ -5,11 +5,12 @@
     'description': """Product Label Report""",
     'author': "Semantic Web Software SL",
     'category': 'Sales/Sales',
-    'version': '1.0',
-    'depends': ['product'],
+    'version': '16.0.1.0.0',
+    'depends': ['product', 'stock'],
     'data': [
         'report/product_label_dymo.xml',
         'views/product_attribute_views.xml',
+        'views/product_label_layout_views.xml',
     ],
     'assets': {
         'web.report_assets_common': [
