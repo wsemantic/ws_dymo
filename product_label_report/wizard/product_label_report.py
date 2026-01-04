@@ -5,13 +5,24 @@ from collections import defaultdict
 from odoo import _, models
 from odoo.exceptions import UserError
 
-def _prepare_custom_data(env, data):
+def _prepare_custom_data(env, docids, data):
     # change product ids by actual product object to get access to fields in xml template
     # we needed to pass ids because reports only accepts native python types (int, float, strings, ...)
+    layout_wizard = env['product.label.layout'].browse(data.get('layout_wizard'))
     if data.get('active_model') == 'product.template':
         Product = env['product.template'].with_context(display_default_code=False)
     elif data.get('active_model') == 'product.product':
         Product = env['product.product'].with_context(display_default_code=False)
+    elif data.get("studio") and docids:
+        products = env['product.template'].with_context(display_default_code=False).browse(docids)
+        quantity_by_product = defaultdict(list)
+        for product in products:
+            quantity_by_product[product].append((product.barcode, 1))
+        return {
+            'quantity': quantity_by_product,
+            'page_numbers': 1,
+            'pricelist': layout_wizard.pricelist_id,
+        }
     else:
         raise UserError(_('Product model not defined, Please contact your administrator.'))
 
@@ -22,9 +33,8 @@ def _prepare_custom_data(env, data):
     product_ids = [int(p) for p in qty_by_product_in.keys()]
     if not product_ids:
         product_ids = [int(p) for p in data.get('product_ids', [])] or [int(p) for p in data.get('product_tmpl_ids', [])]
-    products = Product.search([('id', 'in', product_ids)], order='name asc, barcode asc') if product_ids else Product.browse()
+    products = Product.search([('id', 'in', product_ids)], order='name asc') if product_ids else Product.browse()
     quantity_by_product = defaultdict(list)
-    layout_wizard = env['product.label.layout'].browse(data.get('layout_wizard'))
     if not layout_wizard:
         return {}
     use_stock_quantity = layout_wizard.use_stock_quantity if layout_wizard else False
@@ -45,21 +55,38 @@ def _prepare_custom_data(env, data):
 
     return {
         'quantity': quantity_by_product,
-        'rows': layout_wizard.rows,
-        'columns': layout_wizard.columns,
         'page_numbers': (total - 1) // (layout_wizard.rows * layout_wizard.columns) + 1,
         'price_included': data.get('price_included'),
         'extra_html': layout_wizard.extra_html,
+        'pricelist': layout_wizard.pricelist_id,
     }
 
-class ReportProductTemplateLabel(models.AbstractModel):
-    _inherit = 'report.product.report_producttemplatelabel'
+class ReportProductTemplateLabel2x7(models.AbstractModel):
+    _inherit = 'report.product.report_producttemplatelabel2x7'
 
     def _get_report_values(self, docids, data):
-        return _prepare_custom_data(self.env, data)
+        return _prepare_custom_data(self.env, docids, data)
+
+class ReportProductTemplateLabel4x7(models.AbstractModel):
+    _inherit = 'report.product.report_producttemplatelabel4x7'
+
+    def _get_report_values(self, docids, data):
+        return _prepare_custom_data(self.env, docids, data)
+
+class ReportProductTemplateLabel4x12(models.AbstractModel):
+    _inherit = 'report.product.report_producttemplatelabel4x12'
+
+    def _get_report_values(self, docids, data):
+        return _prepare_custom_data(self.env, docids, data)
+
+class ReportProductTemplateLabel4x12NoPrice(models.AbstractModel):
+    _inherit = 'report.product.report_producttemplatelabel4x12noprice'
+
+    def _get_report_values(self, docids, data):
+        return _prepare_custom_data(self.env, docids, data)
 
 class ReportProductTemplateLabelDymo(models.AbstractModel):
     _inherit = 'report.product.report_producttemplatelabel_dymo'
 
     def _get_report_values(self, docids, data):
-        return _prepare_custom_data(self.env, data)
+        return _prepare_custom_data(self.env, docids, data)

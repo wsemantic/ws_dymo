@@ -8,14 +8,12 @@
             <xpath expr="//field[@name='print_format']" position="after">
                 <field name="use_stock_quantity" />
                 <field name="company_id" invisible="1" />
-                <field name="warehouse_id"
-                       attrs="{'required': [('use_stock_quantity', '=', True)],
-                                'invisible': [('use_stock_quantity', '=', False)]}" />
+                <field name="warehouse_id" required="use_stock_quantity" invisible="not use_stock_quantity" />
             </xpath>
             <xpath expr="//field[@name='custom_quantity']" position="attributes">
                 <attribute name="required">0</attribute>
-                <attribute name="attrs">{'readonly': [('use_stock_quantity', '=', True)],
-                                         'required': [('use_stock_quantity', '=', False)]}</attribute>
+                <attribute name="readonly">use_stock_quantity</attribute>
+                <attribute name="required">not use_stock_quantity</attribute>
             </xpath>
         </field>
     </record>

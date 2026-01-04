@@ -5,7 +5,7 @@
     'description': """Product Label Report""",
     'author': "Semantic Web Software SL",
     'category': 'Sales/Sales',
-    'version': '16.0.1.0.0',
+    'version': '18.0.1.0.0',
     'depends': ['product', 'stock'],
     'data': [
         'report/product_label_dymo.xml',
