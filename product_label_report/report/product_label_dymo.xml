@@ -9,15 +9,15 @@
                         <div t-out="barcode_value" style="padding:0" t-options="{'widget': 'barcode', 'quiet': 0, 'symbology': 'auto', 'img_style': barcode_size}"/>
                         <div class="o_label_name" style="line-height: 100%; background-color: transparent;">
                             <span class="product_barcode" t-out="barcode_value"/>
-                            <span class="product_barcode_name" t-if="product.is_product_variant" t-field="product.name"/>
-                            <span class="product_barcode_name" t-else="" t-field="product.name"/>
+                            <span class="product_barcode_name" t-if="product.is_product_variant" t-field="product.display_name"/>
+                            <span class="product_barcode_name" t-else="" t-field="product.display_name"/>
                         </div>
                     </t>
                 </div>
                 <!-- Product Name Fallback (if no barcode) -->
                 <div t-if="not barcode_value" class="o_label_name" style="line-height: 100%; background-color: transparent; padding-top: 1px;">
                     <span t-if="product.is_product_variant" t-field="product.display_name"/>
-                    <span t-else="" t-field="product.name"/>
+                    <span t-else="" t-field="product.display_name"/>
                 </div>
                 <table style="width: 100%; padding-top: 10px; border: 1px solid white; border-collapse: collapse;" cellspacing="0" cellpadding="0">
                     <tr>
