@@ -1,11 +1,43 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
+import logging
 
 from odoo import _, models
 from odoo.exceptions import UserError
 
+
+_logger = logging.getLogger(__name__)
+
+
+def _resolve_barcode(product):
+    """Return a printable barcode for both templates and variants."""
+    barcode = product.barcode
+    if barcode:
+        return barcode
+
+    if product._name == 'product.template':
+        variant_with_barcode = product.product_variant_ids.filtered('barcode')[:1]
+        resolved = variant_with_barcode.barcode if variant_with_barcode else False
+        if resolved:
+            _logger.info(
+                "Label barcode fallback for template %s (%s) -> variant barcode %s",
+                product.display_name,
+                product.id,
+                resolved,
+            )
+        return resolved
+
+    return False
+
+
 def _prepare_custom_data(env, docids, data):
+    _logger.info(
+        "Preparing label data | active_model=%s, docids=%s, custom_barcodes=%s",
+        data.get('active_model'),
+        docids,
+        bool(data.get('custom_barcodes')),
+    )
     # change product ids by actual product object to get access to fields in xml template
     # we needed to pass ids because reports only accepts native python types (int, float, strings, ...)
     layout_wizard = env['product.label.layout'].browse(data.get('layout_wizard'))
@@ -17,7 +49,7 @@ def _prepare_custom_data(env, docids, data):
         products = env['product.template'].with_context(display_default_code=False).browse(docids)
         quantity_by_product = defaultdict(list)
         for product in products:
-            quantity_by_product[product].append((product.barcode, 1))
+            quantity_by_product[product].append((_resolve_barcode(product), 1))
         return {
             'quantity': quantity_by_product,
             'page_numbers': 1,
@@ -45,13 +77,32 @@ def _prepare_custom_data(env, docids, data):
             q = qty_by_product_in.get(str(product.id), 0)
         if q <= 0:
             continue
-        quantity_by_product[product].append((product.barcode, q))
+        resolved_barcode = _resolve_barcode(product)
+        if not resolved_barcode:
+            _logger.warning(
+                "No barcode resolved for product %s (%s) in main label loop",
+                product.display_name,
+                product.id,
+            )
+        quantity_by_product[product].append((resolved_barcode, q))
         total += q
     if data.get('custom_barcodes'):
         # we expect custom barcodes format as: {product: [(barcode, qty_of_barcode)]}
         for product, barcodes_qtys in data.get('custom_barcodes').items():
-            quantity_by_product[Product.browse(int(product))] += (barcodes_qtys)
-            total += sum(qty for _, qty in barcodes_qtys)
+            product_record = Product.browse(int(product))
+            fallback_barcode = _resolve_barcode(product_record)
+            normalized_barcodes_qtys = [
+                (barcode or fallback_barcode, qty)
+                for barcode, qty in barcodes_qtys
+            ]
+            if not fallback_barcode and any(not barcode for barcode, _ in barcodes_qtys):
+                _logger.warning(
+                    "Empty custom barcode and no fallback for product %s (%s)",
+                    product_record.display_name,
+                    product_record.id,
+                )
+            quantity_by_product[product_record] += normalized_barcodes_qtys
+            total += sum(qty for _, qty in normalized_barcodes_qtys)
 
     return {
         'quantity': quantity_by_product,
