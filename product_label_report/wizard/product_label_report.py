@@ -74,7 +74,7 @@ def _prepare_custom_data(env, docids, data):
         if use_stock_quantity:
             q = layout_wizard._get_product_stock_quantity(product)
         else:
-            q = qty_by_product_in.get(str(product.id), 0)
+            q = qty_by_product_in.get(product.id, qty_by_product_in.get(str(product.id), 0))
         if q <= 0:
             continue
         resolved_barcode = _resolve_barcode(product)

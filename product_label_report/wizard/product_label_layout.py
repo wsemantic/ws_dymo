@@ -46,5 +46,5 @@ class ProductLabelLayout(models.TransientModel):
             'allowed_company_ids': self.company_id.ids if self.company_id else self.env.companies.ids,
         }
         product_ctx = product.with_context(**{k: v for k, v in ctx.items() if v})
-        quantity = product_ctx.quantity
+        quantity = product_ctx.qty_available
         return max(int(round(quantity)), 0)
