@@ -12,9 +12,9 @@
                         <!-- Una sola linea: el codigo flota a la izquierda y el nombre
                              escala segun longitud para no partirse en dos lineas -->
                         <t t-set="name_val" t-value="product.name or ''"/>
-                        <div class="o_label_name" style="line-height: 1.2; background-color: transparent; height: 1.6em; overflow: hidden; padding: 0; margin-top: 2px;">
+                        <div class="o_label_name" style="line-height: 1.1; background-color: transparent; height: 1.15em; overflow: hidden; padding: 0; margin: 0;">
                             <span class="product_barcode" style="float: left; padding-right: 6px;" t-out="barcode_value"/>
-                            <span class="product_barcode_name" t-attf-style="display: block; overflow: hidden; white-space: nowrap; padding-top: 2px; font-size: #{'100' if len(name_val) &lt;= 16 else '82' if len(name_val) &lt;= 22 else '70' if len(name_val) &lt;= 30 else '60'}%;" t-out="name_val"/>
+                            <span class="product_barcode_name" t-attf-style="display: block; overflow: hidden; white-space: nowrap; padding: 0; font-size: #{'100' if len(name_val) &lt;= 16 else '82' if len(name_val) &lt;= 22 else '70' if len(name_val) &lt;= 30 else '60'}%;" t-out="name_val"/>
                         </div>
                     </t>
                 </div>
@@ -34,7 +34,7 @@
                 <table style="width: 100%; padding-top: 0; border: 1px solid white; border-collapse: collapse;" cellspacing="0" cellpadding="0">
                     <tr>
                         <td style="border: 1px solid white; text-align: left; vertical-align: bottom;">
-                            <div t-if="size_val" class="attrib_val_size" t-attf-style="white-space: nowrap; line-height: 0.9; padding: 0; margin-top: 2px; font-weight: bold; font-size: #{'3.4' if len(size_val) &lt;= 2 else '2.6' if len(size_val) &lt;= 4 else '1.8'}em;" t-esc="size_val"/>
+                            <div t-if="size_val" class="attrib_val_size" t-attf-style="white-space: nowrap; line-height: 0.85; padding: 0; margin-top: -0.15em; font-weight: bold; font-size: #{'3.4' if len(size_val) &lt;= 2 else '2.6' if len(size_val) &lt;= 4 else '1.8'}em;" t-esc="size_val"/>
                         </td>
                         <td style="border: 1px solid white; text-align: right; white-space: nowrap; vertical-align: bottom;">
                             <t t-if="product.is_product_variant">
