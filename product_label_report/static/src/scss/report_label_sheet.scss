@@ -8,7 +8,15 @@
     &.o_label_dymo {
         font-size:75%;
         width: 57mm;
-        height: 32mm;
+        // Sin alto fijo: los 32mm que habia aqui desbordaban en cualquier
+        // paperformat de menos de 32mm de alto util (con rollo de 30mm se
+        // recortaba el barcode superior y el desfase se acumulaba etiqueta a
+        // etiqueta, porque wkhtmltopdf empujaba el sobrante a la pagina
+        // siguiente). El contenido ocupa ~26mm, asi que basta con que la caja
+        // lo siga y nunca supere el alto de pagina.
+        height: auto;
+        max-height: 100%;
+        overflow: hidden;
     }
     div {
         padding: 2px 4px;
