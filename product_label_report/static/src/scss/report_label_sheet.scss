@@ -1,3 +1,14 @@
+// stock define .o_label_page.o_label_dymo con height: 32mm y su scss se
+// concatena despues que este en report_assets_common, asi que con la misma
+// especificidad ganaba el suyo. El prefijo body sube la especificidad lo justo
+// para que el alto no supere nunca el de pagina (32mm en un rollo de 30mm
+// desbordaba y el desfase se acumulaba etiqueta a etiqueta).
+body .o_label_page.o_label_dymo {
+    height: auto;
+    max-height: 100%;
+    overflow: hidden;
+}
+
 .o_label_sheet {
     margin-left: -4mm;
     margin-right: -4mm;
