@@ -2,7 +2,12 @@
 <odoo>
     <template id="report_simple_label_dymo" name="Report Label Dymo" inherit_id="product.report_simple_label_dymo">
         <xpath expr="//div[hasclass('o_label_full')]" position="replace">
-            <div class="o_label_full" t-att-style="table_style">
+            <!-- No usamos table_style: core inyecta ahi un height:32mm inline que,
+                 sumado al padding de 2mm del contenedor, da 36mm de contenido y
+                 desborda cualquier rollo mas corto (con 30mm el sobrante pasaba a
+                 la pagina siguiente y el margen superior alternaba etiqueta si,
+                 etiqueta no). Al ser inline ganaba a todo el scss. -->
+            <div class="o_label_full" style="width: 100%; max-height: 100%; overflow: hidden;">
                 <t t-set="barcode_value" t-value="barcode or product.barcode"/>
                 <!-- Nombre sin los valores de variante ni codigo interno: el codigo ya va
                      bajo las barras en pequeno, y color y talla se imprimen aparte -->
