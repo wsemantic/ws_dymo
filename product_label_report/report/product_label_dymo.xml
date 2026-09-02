@@ -41,7 +41,11 @@
                      wkhtmltopdf y el sobrante acababa montandose sobre el precio. Como
                      bloque hermano encima de la tabla queda arriba por posicion en el
                      flujo y no puede invadirlo. Dos lineas a todo el ancho -->
-                <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: 2.1em; overflow: hidden; padding: 0; margin: 0; font-size: #{'100' if len(name_val) &lt;= 26 else '88' if len(name_val) &lt;= 40 else '75'}%;" t-out="name_val"/>
+                <!-- La altura reservada sigue al numero de lineas que hace falta: con
+                     dos fijas siempre, un nombre corto dejaba 2mm en blanco que
+                     separaban la talla y echaban la linea del color fuera de la
+                     etiqueta. A todo el ancho entran unos 26 caracteres por linea -->
+                <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: #{'1.05' if len(name_val) &lt;= 26 else '2.1'}em; overflow: hidden; padding: 0; margin: 0; font-size: #{'100' if len(name_val) &lt;= 26 else '88' if len(name_val) &lt;= 40 else '75'}%;" t-out="name_val"/>
                 <!-- Valores de variante: la talla manda, el color acompana en pequeno -->
                 <t t-set="variant_vals" t-value="product.product_template_attribute_value_ids if product.is_product_variant else product.env['product.template.attribute.value']"/>
                 <t t-set="size_vals" t-value="variant_vals.filtered(lambda l: l.attribute_id.attribute_type == 'size')"/>
