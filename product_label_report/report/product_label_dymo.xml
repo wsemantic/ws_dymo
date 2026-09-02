@@ -41,11 +41,6 @@
                      wkhtmltopdf y el sobrante acababa montandose sobre el precio. Como
                      bloque hermano encima de la tabla queda arriba por posicion en el
                      flujo y no puede invadirlo. Dos lineas a todo el ancho -->
-                <!-- La altura reservada sigue al numero de lineas que hace falta: con
-                     dos fijas siempre, un nombre corto dejaba 2mm en blanco que
-                     separaban la talla y echaban la linea del color fuera de la
-                     etiqueta. A todo el ancho entran unos 26 caracteres por linea -->
-                <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: #{'1.05' if len(name_val) &lt;= 26 else '2.1'}em; overflow: hidden; padding: 0; margin: 0; font-size: #{'100' if len(name_val) &lt;= 26 else '88' if len(name_val) &lt;= 40 else '75'}%;" t-out="name_val"/>
                 <!-- Valores de variante: la talla manda, el color acompana en pequeno -->
                 <t t-set="variant_vals" t-value="product.product_template_attribute_value_ids if product.is_product_variant else product.env['product.template.attribute.value']"/>
                 <t t-set="size_vals" t-value="variant_vals.filtered(lambda l: l.attribute_id.attribute_type == 'size')"/>
@@ -62,7 +57,16 @@
                         <td style="border: 1px solid white; text-align: left; vertical-align: bottom;">
                             <div t-if="size_val" class="attrib_val_size" t-attf-style="white-space: nowrap; line-height: 0.9; padding: 0; margin-top: 0; font-weight: bold; font-size: #{'3.4' if len(size_val) &lt;= 2 else '2.6' if len(size_val) &lt;= 4 else '1.8'}em;" t-esc="size_val"/>
                         </td>
-                        <td style="border: 1px solid white; text-align: right; vertical-align: bottom;">
+                        <!-- Ancho fijo: es lo que hace que el nombre parta dentro de esta
+                             columna y no invada la de la talla -->
+                        <td style="border: 1px solid white; text-align: right; vertical-align: bottom; width: 58%;">
+                            <!-- Alineado a la izquierda para separarlo del precio, que va
+                                 a la derecha. El margen inferior es el colchon que evita
+                                 que un nombre de dos lineas se monte sobre el precio:
+                                 dentro de un td el overflow:hidden no recorta de forma
+                                 fiable en wkhtmltopdf, asi que reservamos aire en vez de
+                                 confiar en el recorte -->
+                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: 2.1em; overflow: hidden; padding: 0; margin: 0 0 1.2mm 0; font-size: #{'100' if len(name_val) &lt;= 22 else '85' if len(name_val) &lt;= 34 else '72'}%;" t-out="name_val"/>
                             <div style="white-space: nowrap; padding: 0; margin: 0;">
                                 <t t-if="product.is_product_variant">
                                     <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block;"/>
