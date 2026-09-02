@@ -1,6 +1,15 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
     <template id="report_simple_label_dymo" name="Report Label Dymo" inherit_id="product.report_simple_label_dymo">
+        <!-- IMPORTANTE: este replace no es solo estetico, corrige un defecto de core.
+             product.report_productlabel_dymo fija a fuego table_style con
+             'width:100%;height:32mm;' y lo aplica inline a este div, sin mirar el
+             paperformat. En un rollo que no mida exactamente 32mm eso desborda
+             (32mm de caja + 2mm x2 de padding_page = 36mm de contenido) y el
+             sobrante empuja a la pagina siguiente, con lo que el margen superior
+             baila etiqueta si, etiqueta no. Al ir inline no hay forma de corregirlo
+             desde el scss ni desde la configuracion: hay que sustituir el div.
+             Si se desinstala este modulo, vuelve el problema. -->
         <xpath expr="//div[hasclass('o_label_full')]" position="replace">
             <!-- No usamos table_style: core inyecta ahi un height:32mm inline que,
                  sumado al padding de 2mm del contenedor, da 36mm de contenido y
@@ -9,17 +18,17 @@
                  etiqueta no). Al ser inline ganaba a todo el scss. -->
             <div class="o_label_full" style="width: 100%; max-height: 100%; overflow: hidden;">
                 <t t-set="barcode_value" t-value="barcode or product.barcode"/>
+                <t t-set="name_val" t-value="product.name or ''"/>
                 <!-- Nombre sin los valores de variante ni codigo interno: el codigo ya va
-                     bajo las barras en pequeno, y color y talla se imprimen aparte -->
+                     bajo las barras en pequeno, y color y talla se imprimen aparte.
+                     El nombre ya no acompana al codigo aqui: iba en una sola linea sin
+                     wrap y se recortaba. Ahora baja a la columna derecha de la tabla,
+                     encima del precio, donde dispone de dos lineas -->
                 <div class="text-start o_label_small_barcode" style="padding: 0;">
                     <t t-if="barcode_value">
                         <div t-out="barcode_value" style="padding:0" t-options="{'widget': 'barcode', 'quiet': 0, 'symbology': 'auto', 'img_style': barcode_size}"/>
-                        <!-- Una sola linea: el codigo flota a la izquierda y el nombre
-                             escala segun longitud para no partirse en dos lineas -->
-                        <t t-set="name_val" t-value="product.name or ''"/>
                         <div class="o_label_name" style="line-height: 1.1; background-color: transparent; height: 1.15em; overflow: hidden; padding: 0; margin: 0;">
-                            <span class="product_barcode" style="float: left; padding-right: 6px;" t-out="barcode_value"/>
-                            <span class="product_barcode_name" t-attf-style="display: block; overflow: hidden; white-space: nowrap; padding: 0; font-size: #{'100' if len(name_val) &lt;= 16 else '82' if len(name_val) &lt;= 22 else '70' if len(name_val) &lt;= 30 else '60'}%;" t-out="name_val"/>
+                            <span class="product_barcode" t-out="barcode_value"/>
                         </div>
                     </t>
                 </div>
@@ -43,13 +52,20 @@
                         <td style="border: 1px solid white; text-align: left; vertical-align: bottom;">
                             <div t-if="size_val" class="attrib_val_size" t-attf-style="white-space: nowrap; line-height: 0.9; padding: 0; margin-top: 0; font-weight: bold; font-size: #{'3.4' if len(size_val) &lt;= 2 else '2.6' if len(size_val) &lt;= 4 else '1.8'}em;" t-esc="size_val"/>
                         </td>
-                        <td style="border: 1px solid white; text-align: right; white-space: nowrap; vertical-align: bottom;">
-                            <t t-if="product.is_product_variant">
-                                <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block;"/>
-                            </t>
-                            <t t-else="">
-                                <strong class="o_label_price_medium" t-field="product.list_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block;"/>
-                            </t>
+                        <!-- Ancho fijo para que el nombre sepa donde partir y no invada
+                             la talla; la celda de la talla se queda con el resto -->
+                        <td style="border: 1px solid white; text-align: right; vertical-align: bottom; width: 58%;">
+                            <!-- Dos lineas como maximo: con line-height 1.05 el max-height
+                                 de 2.1em corta limpio sin dejar media linea asomando -->
+                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: right; line-height: 1.05; max-height: 2.1em; overflow: hidden; padding: 0; margin: 0; font-size: #{'100' if len(name_val) &lt;= 22 else '85' if len(name_val) &lt;= 34 else '72'}%;" t-out="name_val"/>
+                            <div style="white-space: nowrap; padding: 0; margin: 0;">
+                                <t t-if="product.is_product_variant">
+                                    <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block;"/>
+                                </t>
+                                <t t-else="">
+                                    <strong class="o_label_price_medium" t-field="product.list_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block;"/>
+                                </t>
+                            </div>
                         </td>
                     </tr>
                 </table>
