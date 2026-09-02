@@ -36,6 +36,12 @@
                 <div t-if="not barcode_value" class="o_label_name" style="line-height: 100%; background-color: transparent; height: auto; max-height: 2.2em; padding: 0;">
                     <span t-out="('[%s] %s' % (product.default_code, product.name)) if product.default_code else (product.name or '')"/>
                 </div>
+                <!-- El nombre va en su propio bloque, no dentro del td del precio: el
+                     overflow:hidden no recorta de forma fiable dentro de una celda en
+                     wkhtmltopdf y el sobrante acababa montandose sobre el precio. Como
+                     bloque hermano encima de la tabla queda arriba por posicion en el
+                     flujo y no puede invadirlo. Dos lineas a todo el ancho -->
+                <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: 2.1em; overflow: hidden; padding: 0; margin: 0; font-size: #{'100' if len(name_val) &lt;= 26 else '88' if len(name_val) &lt;= 40 else '75'}%;" t-out="name_val"/>
                 <!-- Valores de variante: la talla manda, el color acompana en pequeno -->
                 <t t-set="variant_vals" t-value="product.product_template_attribute_value_ids if product.is_product_variant else product.env['product.template.attribute.value']"/>
                 <t t-set="size_vals" t-value="variant_vals.filtered(lambda l: l.attribute_id.attribute_type == 'size')"/>
@@ -47,22 +53,12 @@
                 <t t-set="color_val" t-value="color_val if len(color_val) &lt;= 12 else color_val[:12] + '…'"/>
                 <!-- margin-top en mm, no en em: la fila baja lo mismo aunque la
                      talla cambie de cuerpo segun su longitud -->
-                <table style="width: 100%; margin-top: 1.5mm; padding-top: 0; border: 1px solid white; border-collapse: collapse;" cellspacing="0" cellpadding="0">
+                <table style="width: 100%; margin-top: 0.8mm; padding-top: 0; border: 1px solid white; border-collapse: collapse;" cellspacing="0" cellpadding="0">
                     <tr>
                         <td style="border: 1px solid white; text-align: left; vertical-align: bottom;">
                             <div t-if="size_val" class="attrib_val_size" t-attf-style="white-space: nowrap; line-height: 0.9; padding: 0; margin-top: 0; font-weight: bold; font-size: #{'3.4' if len(size_val) &lt;= 2 else '2.6' if len(size_val) &lt;= 4 else '1.8'}em;" t-esc="size_val"/>
                         </td>
-                        <!-- Ancho fijo para que el nombre sepa donde partir y no invada
-                             la talla; la celda de la talla se queda con el resto -->
-                        <td style="border: 1px solid white; text-align: right; vertical-align: bottom; width: 58%;">
-                            <!-- height fijo, no max-height: el webkit de wkhtmltopdf no
-                                 recorta de forma fiable con max-height y el sobrante se
-                                 montaba sobre el precio. Con altura reservada el texto
-                                 fluye desde arriba (un nombre de una linea se queda
-                                 arriba en vez de caer sobre el precio) y lo que no cabe
-                                 se corta de verdad. Alineado a la izquierda para separarlo
-                                 visualmente del precio, que va a la derecha -->
-                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: 2.1em; overflow: hidden; padding: 0; margin: 0; font-size: #{'100' if len(name_val) &lt;= 22 else '85' if len(name_val) &lt;= 34 else '72'}%;" t-out="name_val"/>
+                        <td style="border: 1px solid white; text-align: right; vertical-align: bottom;">
                             <div style="white-space: nowrap; padding: 0; margin: 0;">
                                 <t t-if="product.is_product_variant">
                                     <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block;"/>
