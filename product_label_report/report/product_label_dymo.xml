@@ -54,7 +54,11 @@
                      talla cambie de cuerpo segun su longitud -->
                 <table style="width: 100%; margin-top: 0.8mm; padding-top: 0; border: 1px solid white; border-collapse: collapse;" cellspacing="0" cellpadding="0">
                     <tr>
-                        <td style="border: 1px solid white; text-align: left; vertical-align: bottom;">
+                        <!-- vertical-align top: las dos celdas comparten la altura de la
+                             fila, asi que con bottom la talla bajaba arrastrada por el
+                             nombre de la columna de al lado. Anclada arriba, cada columna
+                             se comporta de forma independiente -->
+                        <td style="border: 1px solid white; text-align: left; vertical-align: top;">
                             <div t-if="size_val" class="attrib_val_size" t-attf-style="white-space: nowrap; line-height: 0.9; padding: 0; margin-top: 0; font-weight: bold; font-size: #{'3.4' if len(size_val) &lt;= 2 else '2.6' if len(size_val) &lt;= 4 else '1.8'}em;" t-esc="size_val"/>
                         </td>
                         <!-- Ancho fijo: es lo que hace que el nombre parta dentro de esta
@@ -66,7 +70,7 @@
                                  dentro de un td el overflow:hidden no recorta de forma
                                  fiable en wkhtmltopdf, asi que reservamos aire en vez de
                                  confiar en el recorte -->
-                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: 2.1em; overflow: hidden; padding: 0; margin: 0 0 1.2mm 0; font-size: #{'100' if len(name_val) &lt;= 22 else '85' if len(name_val) &lt;= 34 else '72'}%;" t-out="name_val"/>
+                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: #{'1.05' if len(name_val) &lt;= 22 else '2.1'}em; overflow: hidden; padding: 0; margin: 0 0 1.2mm 0; font-size: #{'100' if len(name_val) &lt;= 22 else '85' if len(name_val) &lt;= 34 else '72'}%;" t-out="name_val"/>
                             <div style="white-space: nowrap; padding: 0; margin: 0;">
                                 <t t-if="product.is_product_variant">
                                     <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block;"/>
