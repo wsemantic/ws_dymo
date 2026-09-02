@@ -47,9 +47,14 @@
                 <t t-set="size_val" t-value="size_vals[0].name if size_vals else ''"/>
                 <t t-set="color_val" t-value="', '.join((color_vals + other_vals).mapped('name'))"/>
                 <t t-set="color_val" t-value="color_val if len(color_val) &lt;= 12 else color_val[:12] + '…'"/>
-                <!-- margin-top en mm, no en em: la fila baja lo mismo aunque la
-                     talla cambie de cuerpo segun su longitud -->
-                <table style="width: 100%; margin-top: 0.8mm; padding-top: 0; border: 1px solid white; border-collapse: collapse;" cellspacing="0" cellpadding="0">
+                <!-- Sin margen superior: la tabla arranca con el codigo alfanumerico,
+                     que va pegado a las barras. El margen existia cuando la primera
+                     fila era la talla y se montaba sobre el codigo de barras -->
+                <!-- table-layout: fixed es imprescindible: en modo auto el width de la
+                     celda es solo una sugerencia y la tabla ensancha la columna para no
+                     partir el texto, con lo que el nombre se quedaba en una linea y se
+                     recortaba en vez de pasar a la segunda -->
+                <table style="width: 100%; table-layout: fixed; margin-top: 0; padding-top: 0; border: 1px solid white; border-collapse: collapse;" cellspacing="0" cellpadding="0">
                     <!-- Rejilla de 3 filas con rowspan para que cada columna se ancle
                          donde le toca sin arrastrar a la otra. El codigo alfanumerico
                          entra aqui como primera fila de la izquierda en vez de ir en una
@@ -67,7 +72,7 @@
                                  midan el codigo y la talla juntos tanto si el nombre las
                                  usa como si no, asi que salen de espacio que de otro modo
                                  quedaria en blanco -->
-                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: #{'1.05' if len(name_val) &lt;= 22 else '2.1' if len(name_val) &lt;= 44 else '3.15'}em; overflow: hidden; padding: 0; margin: 0; font-size: #{'100' if len(name_val) &lt;= 22 else '85' if len(name_val) &lt;= 44 else '72'}%;" t-out="name_val"/>
+                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: #{'1.05' if len(name_val) &lt;= 22 else '2.1' if len(name_val) &lt;= 44 else '3.15'}em; overflow: hidden; word-wrap: break-word; padding: 0; margin: 0; font-size: #{'100' if len(name_val) &lt;= 22 else '85' if len(name_val) &lt;= 44 else '72'}%;" t-out="name_val"/>
                         </td>
                     </tr>
                     <tr>
