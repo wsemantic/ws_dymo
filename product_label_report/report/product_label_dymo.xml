@@ -71,8 +71,14 @@
                                  a la derecha. Hasta tres lineas: esta columna mide lo que
                                  midan el codigo y la talla juntos tanto si el nombre las
                                  usa como si no, asi que salen de espacio que de otro modo
-                                 quedaria en blanco -->
-                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: #{'1.05' if len(name_val) &lt;= 22 else '2.1' if len(name_val) &lt;= 44 else '3.15'}em; overflow: hidden; white-space: normal; word-wrap: break-word; padding: 0; margin: 0; font-size: #{'100' if len(name_val) &lt;= 22 else '85' if len(name_val) &lt;= 44 else '72'}%;" t-out="name_val"/>
+                                 quedaria en blanco.
+                                 Los umbrales estan calibrados para el ancho de ESTA
+                                 columna (58% ~ 30mm, unos 14 caracteres por linea a
+                                 tamano completo), no para el ancho de la etiqueta. Si se
+                                 cambia el width del td hay que revisarlos: son lo que
+                                 decide cuantas lineas se reservan, y si se quedan cortos
+                                 el texto se recorta en vez de pasar a la linea siguiente -->
+                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: #{'1.05' if len(name_val) &lt;= 12 else '2.1' if len(name_val) &lt;= 28 else '3.15'}em; overflow: hidden; white-space: normal; word-wrap: break-word; padding: 0; margin: 0; font-size: #{'100' if len(name_val) &lt;= 12 else '90' if len(name_val) &lt;= 28 else '78'}%;" t-out="name_val"/>
                         </td>
                     </tr>
                     <tr>
