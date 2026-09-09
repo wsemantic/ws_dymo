@@ -50,39 +50,73 @@ class ProductLabelNameFit(models.AbstractModel):
     _name = 'product.label.name.fit'
     _description = 'Ajuste del nombre en la etiqueta'
 
-    # Caracteres por linea del ancho de SU columna (65% ~ 34mm), no del ancho
-    # de la etiqueta: si se cambia el width del td hay que rehacer este numero.
+    # Capacidad de una linea en "unidades de ancho", donde 1.0 es una minuscula
+    # normal. No son caracteres: la fuente es proporcional y un conteo plano se
+    # queda corto justo con las palabras anchas, que es cuando el texto se va a
+    # una linea de mas y se recorta. Sale del ancho de SU columna (65% ~ 34mm):
+    # si se cambia el width del td hay que rehacer este numero.
     # El limite de la columna de al lado no es el codigo -va a .6em y sobra
     # sitio- sino la talla, que es nowrap a 3.4em: si se le quita ancho no se
     # parte, desborda, y vuelve a disparar el encogimiento de wkhtmltopdf.
-    _LABEL_NAME_CHARS_PER_LINE = 15
+    _LABEL_NAME_LINE_UNITS = 14.0
+    # Anchos relativos aproximados. Solo hay que ser mas fino que "todos igual":
+    # el error que importa es el de la palabra ancha que fuerza linea extra.
+    _LABEL_NAME_NARROW = "iljtfrI.,;:'|!()[]-"
+    _LABEL_NAME_WIDE = 'mwMW@%'
     # Techo del presupuesto vertical: mas lineas empujarian la linea del color
     # fuera del rollo. Pasado el techo se recorta, que es el mal menor.
     _LABEL_NAME_MAX_LINES = 3
     _LABEL_NAME_LINE_HEIGHT = 1.05
 
     @api.model
-    def _label_name_line_count(self, text, chars_per_line):
-        """Lineas que ocupa `text` partido a `chars_per_line` caracteres."""
+    def _label_name_char_width(self, char):
+        if char in self._LABEL_NAME_NARROW:
+            return 0.5
+        if char in self._LABEL_NAME_WIDE:
+            return 1.6
+        if char.isupper() or char.isdigit():
+            return 1.25
+        return 1.0
+
+    @api.model
+    def _label_name_width(self, text):
+        return sum(self._label_name_char_width(c) for c in text)
+
+    @api.model
+    def _label_name_line_count(self, text, line_units):
+        """Lineas que ocupa `text` en una columna de `line_units` de ancho."""
+        space = self._label_name_char_width(' ')
         lines = 0
-        current = 0
+        current = 0.0
         for word in (text or '').split():
+            width = self._label_name_width(word)
             # Palabra mas ancha que la columna: break-word la corta donde llega,
-            # sin guion, y consume una linea entera por cada trozo.
-            while len(word) > chars_per_line:
+            # sin guion, y consume una linea entera por cada trozo. Se parte por
+            # ancho acumulado, no por numero de caracteres.
+            while width > line_units:
                 if current:
                     lines += 1
-                    current = 0
+                    current = 0.0
+                cut = 0.0
+                index = 0
+                for index, char in enumerate(word):
+                    step = self._label_name_char_width(char)
+                    if cut + step > line_units:
+                        break
+                    cut += step
+                else:
+                    index = len(word)
                 lines += 1
-                word = word[chars_per_line:]
+                word = word[index or 1:]
+                width = self._label_name_width(word)
             if not word:
                 continue
-            needed = len(word) if not current else current + 1 + len(word)
-            if needed <= chars_per_line:
+            needed = width if not current else current + space + width
+            if needed <= line_units:
                 current = needed
             else:
                 lines += 1
-                current = len(word)
+                current = width
         if current:
             lines += 1
         return max(lines, 1)
@@ -90,6 +124,6 @@ class ProductLabelNameFit(models.AbstractModel):
     @api.model
     def _label_name_height(self, text):
         """Alto en em a reservar para el nombre, con el techo aplicado."""
-        lines = self._label_name_line_count(text, self._LABEL_NAME_CHARS_PER_LINE)
+        lines = self._label_name_line_count(text, self._LABEL_NAME_LINE_UNITS)
         lines = min(lines, self._LABEL_NAME_MAX_LINES)
         return round(lines * self._LABEL_NAME_LINE_HEIGHT, 2)
