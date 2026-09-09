@@ -74,7 +74,7 @@
                         </td>
                         <!-- Ancho fijo: es lo que hace que el nombre parta dentro de esta
                              columna y no invada la de la talla -->
-                        <td rowspan="2" style="border: 1px solid white; text-align: left; vertical-align: top; width: 58%;">
+                        <td rowspan="2" style="border: 1px solid white; text-align: left; vertical-align: top; width: 65%;">
                             <!-- Alineado a la izquierda para separarlo del precio, que va
                                  a la derecha. Hasta tres lineas: esta columna mide lo que
                                  midan el codigo y la talla juntos tanto si el nombre las
@@ -82,7 +82,7 @@
                                  quedaria en blanco.
                                  El alto se reserva desde Python (_label_name_height):
                                  los caracteres por linea de ese calculo salen del ancho
-                                 de ESTA columna (58% ~ 30mm, unos 14 caracteres), no del
+                                 de ESTA columna (65% ~ 34mm, unos 15 caracteres), no del
                                  ancho de la etiqueta. Si se cambia el width del td hay
                                  que rehacer ese numero, o el texto se recorta en vez de
                                  pasar a la linea siguiente -->

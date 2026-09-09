@@ -50,9 +50,12 @@ class ProductLabelNameFit(models.AbstractModel):
     _name = 'product.label.name.fit'
     _description = 'Ajuste del nombre en la etiqueta'
 
-    # Caracteres por linea del ancho de SU columna (58% ~ 30mm), no del ancho
+    # Caracteres por linea del ancho de SU columna (65% ~ 34mm), no del ancho
     # de la etiqueta: si se cambia el width del td hay que rehacer este numero.
-    _LABEL_NAME_CHARS_PER_LINE = 14
+    # El limite de la columna de al lado no es el codigo -va a .6em y sobra
+    # sitio- sino la talla, que es nowrap a 3.4em: si se le quita ancho no se
+    # parte, desborda, y vuelve a disparar el encogimiento de wkhtmltopdf.
+    _LABEL_NAME_CHARS_PER_LINE = 15
     # Techo del presupuesto vertical: mas lineas empujarian la linea del color
     # fuera del rollo. Pasado el techo se recorta, que es el mal menor.
     _LABEL_NAME_MAX_LINES = 3
