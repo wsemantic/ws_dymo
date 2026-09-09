@@ -61,8 +61,16 @@
                          linea propia a todo el ancho: asi el nombre arranca a su misma
                          altura y aprovecha el hueco que quedaba en blanco a su derecha -->
                     <tr>
-                        <td style="border: 1px solid white; text-align: left; vertical-align: top;">
-                            <span class="product_barcode" t-out="barcode_value"/>
+                        <!-- overflow y cuerpo reducido no son estetica: este span es el
+                             unico elemento que crece con el producto, y a tamano completo
+                             un EAN-13 desborda el ancho de esta columna (~24mm con
+                             table-layout:fixed). Ese desbordamiento activaba el
+                             encogimiento inteligente de wkhtmltopdf, que es un zoom sobre
+                             el ANCHO de toda la pagina: la etiqueta entera cambiaba de
+                             tamano segun la longitud del codigo. Con esto el render deja
+                             de depender del producto. -->
+                        <td style="border: 1px solid white; text-align: left; vertical-align: top; overflow: hidden;">
+                            <span class="product_barcode" t-out="barcode_value" style="font-size: .6em; word-break: break-all;"/>
                         </td>
                         <!-- Ancho fijo: es lo que hace que el nombre parta dentro de esta
                              columna y no invada la de la talla -->
@@ -72,13 +80,14 @@
                                  midan el codigo y la talla juntos tanto si el nombre las
                                  usa como si no, asi que salen de espacio que de otro modo
                                  quedaria en blanco.
-                                 Los umbrales estan calibrados para el ancho de ESTA
-                                 columna (58% ~ 30mm, unos 14 caracteres por linea a
-                                 tamano completo), no para el ancho de la etiqueta. Si se
-                                 cambia el width del td hay que revisarlos: son lo que
-                                 decide cuantas lineas se reservan, y si se quedan cortos
-                                 el texto se recorta en vez de pasar a la linea siguiente -->
-                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: #{'1.05' if len(name_val) &lt;= 12 else '2.1' if len(name_val) &lt;= 28 else '3.15'}em; overflow: hidden; white-space: normal; word-wrap: break-word; padding: 0; margin: 0; font-size: #{'100' if len(name_val) &lt;= 12 else '90' if len(name_val) &lt;= 28 else '78'}%;" t-out="name_val"/>
+                                 El alto se reserva desde Python (_label_name_height):
+                                 los caracteres por linea de ese calculo salen del ancho
+                                 de ESTA columna (58% ~ 30mm, unos 14 caracteres), no del
+                                 ancho de la etiqueta. Si se cambia el width del td hay
+                                 que rehacer ese numero, o el texto se recorta en vez de
+                                 pasar a la linea siguiente -->
+                            <t t-set="name_height" t-value="product.env['product.label.name.fit']._label_name_height(name_val)"/>
+                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: #{name_height}em; overflow: hidden; white-space: normal; word-wrap: break-word; padding: 0; margin: 0;" t-out="name_val"/>
                         </td>
                     </tr>
                     <tr>
