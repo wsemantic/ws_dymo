@@ -73,37 +73,74 @@ recorte para evitar solapes; separar los elementos en celdas distintas.
 **Nombre en su propio bloque a todo el ancho, bajo el código.** Se ve entero pero
 añade ~2,3mm de altura y echa la línea del color fuera de la etiqueta.
 
-**Nombre y precio en la misma celda.** No se pueden anclar uno arriba y otro
-abajo. Y al compartir fila con la talla, el nombre la arrastraba hacia abajo.
-De ahí la rejilla con `rowspan` (ver abajo).
+**Rejilla de 3 filas con `rowspan` cruzados** (nombre en filas 1-2, talla en
+2-3, precio en la 3). Parecía la forma de anclar cada cosa donde le toca, pero
+WebKit reparte el alto sobrante de cada `rowspan` entre sus filas y las
+restricciones se encadenan: la fila del precio tenía que absorber además la
+parte de la talla que no cabía en la fila 2, y la tabla salía **más alta que
+cualquiera de las dos columnas**. Con dos líneas de nombre eso empujaba el color
+a la etiqueta siguiente. Sustituida por una sola fila con dos celdas que apilan
+lo suyo: así el alto es exactamente `max(izquierda, derecha)`.
+
+**Color debajo de la tabla.** Cae donde acabe la columna más alta, que con tres
+líneas de nombre más precio ya toca el borde del rollo de 30mm: el color salía
+cortado y arrastraba una etiqueta en blanco. Ahora va en la celda izquierda,
+bajo la talla, donde sobra alto y no depende del nombre.
+
+**`line-height: 1.05` en el nombre.** Ajustado al milímetro para Helvetica, pero
+la fuente la pone cada instalación (una de ellas usa Lato, con ascendentes y
+descendentes más largos) y el texto se salía por abajo de la caja reservada y se
+montaba sobre el precio. Va a 1.2, que cubre las fuentes habituales, y el precio
+lleva además `margin-top: 0.3em` porque su cifra (`.oe_currency_value` a 1.3em
+sobre 1.7em) sobresale por arriba de su propia caja de línea.
+
+**Contar mayúsculas a 1.25 unidades con 14 por línea.** Estimaba 3 líneas para
+un nombre que el render hacía en 2, y el alto reservado de más estiraba la
+tabla. Medido sobre una etiqueta real: 13 mayúsculas más un espacio llenan el
+93% de la columna. Las proporciones actuales de `product.py` (mayúscula 1.3,
+dígito 1.05, espacio 0.5, 18 unidades por línea) salen de esa medida. Si se
+recalibra, hacerlo con una muestra impresa, no a ojo.
 
 **`header_spacing` del paperformat.** No hace nada: wkhtmltopdf solo lo aplica si
 el informe tiene cabecera, y este no la tiene. El valor 30 que trae es el que
 Odoo pone por defecto pensando en A4.
 
 **Encogimiento inteligente (`disable_shrinking`).** Es un zoom calculado sobre el
-*ancho*, no un ajuste vertical. Que "arreglara" el desbordamiento era casualidad.
-El diseño debe cuadrar con el encogimiento desactivado.
+*ancho*, no un ajuste vertical. Y **no es condicional**: wkhtmltopdf maqueta a
+96dpi y escala al papel a 75dpi, así que aplica siempre un factor ~0.78 aunque
+todo quepa. Que "arreglara" el desbordamiento era casualidad. El diseño debe
+cuadrar con el encogimiento desactivado; dos instalaciones con el flag distinto
+imprimen la misma plantilla a tamaños distintos y despistan al comparar.
+
+**Vistas huérfanas de un módulo anterior.** Al mover esta personalización desde
+otro módulo quedó en una base una vista `...custom` heredando del mismo
+`product.report_simple_label_dymo`, con la plantilla antigua. Actualizar este
+módulo no la toca, y las dos herencias se aplican sobre el mismo `div`: los
+cambios "no llegaban". Si un cambio no se ve tras `-u`, buscar en Ajustes →
+Técnico → Vistas todas las que hereden de ese template y comprobar el ID
+externo: solo deben quedar la de core y `product_label_report.report_simple_label_dymo`
+(nombre "Report Label Dymo").
 
 ## Estructura de la etiqueta
 
 ```
 [ barras del codigo, a todo el ancho ]
 ┌──────────┬─────────────────┐
-│ codigo   │                 │
-├──────────┤  nombre         │   tabla de 3 filas con rowspan
-│  TALLA   │                 │
-│          ├─────────────────┤
-│          │     precio      │
+│ codigo   │ nombre          │
+│  TALLA   │ (1 a 3 lineas)  │   una fila, dos celdas independientes
+│ color    │          precio │
 └──────────┴─────────────────┘
-[ color ]
 ```
 
-La rejilla con `rowspan` existe para que cada elemento se ancle donde le toca sin
-arrastrar a los demás: nombre arriba, precio abajo, talla independiente de ambos.
-El código alfanumérico entra como primera fila de la izquierda —en vez de ir en
-una línea propia a todo el ancho— para que el nombre arranque a su altura y
-aproveche el hueco que si no quedaría en blanco a su derecha.
+Dos celdas y **ninguna fila compartida**: cada columna apila lo suyo y el alto
+de la tabla es `max(izquierda, derecha)`. La izquierda (código, talla, color)
+mide siempre lo mismo; la derecha crece con las líneas del nombre y el precio
+va justo debajo. El color está en la izquierda a propósito: es lo que garantiza
+que un nombre de tres líneas no lo eche fuera del rollo. Como esa columna es
+estrecha (~24mm) el color baja de cuerpo con la longitud, igual que la talla.
+
+El alto del nombre se reserva desde Python (`product.label.name.fit`), que
+simula el ajuste de línea por palabras con anchos aproximados por carácter.
 
 `table-layout: fixed` es **imprescindible**: en modo `auto` el `width` del `td` es
 solo una sugerencia y la tabla ensancha la columna para no partir el texto, con lo
@@ -113,16 +150,13 @@ que el nombre se queda en una línea y se recorta.
 
 | Síntoma | Palanca |
 |---|---|
-| El nombre se recorta | Bajar los umbrales de longitud del `div.product_barcode_name` |
-| Un nombre corto salta de línea sin usarla | Subir esos umbrales |
-| Se cambia el `width: 58%` del `td` del nombre | **Revisar los umbrales**: están calibrados para ese ancho (~30mm, unos 14 caracteres por línea a tamaño completo) |
-| La talla se aprieta | Bajar el `width: 58%` |
+| El nombre se recorta / salta de línea sin usarla | `_LABEL_NAME_LINE_UNITS` y los anchos por carácter en `models/product.py`. Recalibrar con una muestra impresa |
+| Se cambia el `width: 65%` del `td` del nombre | **Rehacer `_LABEL_NAME_LINE_UNITS`**: está calibrado para ese ancho (~34mm) |
+| Se cambia el `line-height` del nombre | Cambiarlo también en `_LABEL_NAME_LINE_HEIGHT`; van a la par |
+| El precio roza el nombre | `margin-top` del `div` del precio (0.3em) |
+| El color desborda su columna | Umbrales de longitud del `div.attrib_val_color` |
+| La talla se aprieta | Bajar el `width: 65%` |
 | El código de barras roza por arriba | `margin_top` del paperformat, no la plantilla: es alineación de *esa* impresora |
-| Talla y precio muy pegados al código | `margin-top` de la `table` |
-
-Los umbrales de longitud van en pares (altura reservada y tamaño de fuente) y
-**deben cambiarse juntos**: el nombre que baja de cuerpo es el mismo que recibe
-una línea más.
 
 ## Al depurar: no te fíes de lo que ves impreso
 
