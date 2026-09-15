@@ -73,7 +73,10 @@ class ProductLabelNameFit(models.AbstractModel):
     # Techo del presupuesto vertical: mas lineas empujarian la linea del color
     # fuera del rollo. Pasado el techo se recorta, que es el mal menor.
     _LABEL_NAME_MAX_LINES = 3
-    _LABEL_NAME_LINE_HEIGHT = 1.05
+    # 1.2 y no 1.05: tiene que cubrir ascendentes y descendentes de la fuente
+    # de cada base (Lato, en la que se pisaba, los tiene mas largos que
+    # Helvetica). Ha de coincidir con el line-height del div en la plantilla.
+    _LABEL_NAME_LINE_HEIGHT = 1.2
 
     @api.model
     def _label_name_char_width(self, char):

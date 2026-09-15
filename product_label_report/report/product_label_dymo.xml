@@ -88,7 +88,7 @@
                                  ese numero, o el texto se recorta en vez de pasar a la
                                  linea siguiente -->
                             <t t-set="name_height" t-value="product.env['product.label.name.fit']._label_name_height(name_val)"/>
-                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: #{name_height}em; overflow: hidden; white-space: normal; word-wrap: break-word; padding: 0; margin: 0;" t-out="name_val"/>
+                            <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.2; height: #{name_height}em; overflow: hidden; white-space: normal; word-wrap: break-word; padding: 0; margin: 0;" t-out="name_val"/>
                             <!-- Margen superior: la cifra (.oe_currency_value a 1.3em sobre
                                  los 1.7em del strong) sobresale por arriba de su caja de
                                  linea y sin este hueco se monta sobre la ultima linea del
