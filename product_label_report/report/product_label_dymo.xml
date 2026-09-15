@@ -89,7 +89,11 @@
                                  linea siguiente -->
                             <t t-set="name_height" t-value="product.env['product.label.name.fit']._label_name_height(name_val)"/>
                             <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: #{name_height}em; overflow: hidden; white-space: normal; word-wrap: break-word; padding: 0; margin: 0;" t-out="name_val"/>
-                            <div style="white-space: nowrap; text-align: right; padding: 0; margin: 0;">
+                            <!-- Margen superior: la cifra (.oe_currency_value a 1.3em sobre
+                                 los 1.7em del strong) sobresale por arriba de su caja de
+                                 linea y sin este hueco se monta sobre la ultima linea del
+                                 nombre cuando el texto llega hasta el precio -->
+                            <div style="white-space: nowrap; text-align: right; padding: 0; margin: 0.3em 0 0 0;">
                                 <t t-if="product.is_product_variant">
                                     <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block;"/>
                                 </t>
@@ -100,7 +104,9 @@
                         </td>
                     </tr>
                 </table>
-                <div t-if="color_val" class="attrib_val_color" t-attf-style="text-align: left; white-space: nowrap; overflow: hidden; line-height: 100%; padding: 0; font-size: #{'100' if len(color_val) &lt;= 10 else '87'}%;" t-esc="color_val"/>
+                <!-- Margen negativo: la caja de linea del precio (cifra a 2.2em) deja
+                     aire bajo los digitos y el color quedaba demasiado separado de la talla -->
+                <div t-if="color_val" class="attrib_val_color" t-attf-style="text-align: left; white-space: nowrap; overflow: hidden; line-height: 100%; padding: 0; margin-top: -0.3em; font-size: #{'100' if len(color_val) &lt;= 10 else '87'}%;" t-esc="color_val"/>
                 <!-- Optional Extra HTML (currently disabled) -->
                 <div t-if="False" class="o_label_extra_data">
                     <t t-out="extra_html"/>
