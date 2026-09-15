@@ -55,49 +55,41 @@
                      partir el texto, con lo que el nombre se quedaba en una linea y se
                      recortaba en vez de pasar a la segunda -->
                 <table style="width: 100%; table-layout: fixed; margin-top: 0; padding-top: 0; border: 1px solid white; border-collapse: collapse;" cellspacing="0" cellpadding="0">
-                    <!-- Rejilla de 3 filas con rowspan para que cada columna se ancle
-                         donde le toca sin arrastrar a la otra. El codigo alfanumerico
-                         entra aqui como primera fila de la izquierda en vez de ir en una
-                         linea propia a todo el ancho: asi el nombre arranca a su misma
-                         altura y aprovecha el hueco que quedaba en blanco a su derecha -->
+                    <!-- Una sola fila y dos celdas independientes, cada una apila lo
+                         suyo: codigo + talla a la izquierda, nombre + precio a la
+                         derecha. Antes era una rejilla de 3 filas con rowspan cruzados
+                         (nombre en 1-2, talla en 2-3) y webkit repartia el alto
+                         sobrante de cada rowspan entre sus filas, de modo que la fila
+                         del precio tenia que absorber ademas la parte de la talla que
+                         no cabia en la fila 2: la tabla salia mas alta que cualquiera
+                         de las dos columnas y empujaba el color a la etiqueta
+                         siguiente. Con dos celdas el alto es max(izquierda, derecha). -->
                     <tr>
-                        <!-- overflow y cuerpo reducido no son estetica: este span es el
-                             unico elemento que crece con el producto, y a tamano completo
-                             un EAN-13 desborda el ancho de esta columna (~24mm con
-                             table-layout:fixed). Ese desbordamiento activaba el
-                             encogimiento inteligente de wkhtmltopdf, que es un zoom sobre
-                             el ANCHO de toda la pagina: la etiqueta entera cambiaba de
-                             tamano segun la longitud del codigo. Con esto el render deja
-                             de depender del producto. -->
                         <td style="border: 1px solid white; text-align: left; vertical-align: top; overflow: hidden;">
-                            <span class="product_barcode" t-out="barcode_value" style="font-size: .6em; word-break: break-all;"/>
+                            <!-- overflow y cuerpo reducido no son estetica: este span es
+                                 el unico elemento que crece con el producto, y a tamano
+                                 completo un EAN-13 desborda el ancho de esta columna
+                                 (~24mm con table-layout:fixed). Ese desbordamiento
+                                 activaba el encogimiento inteligente de wkhtmltopdf, que
+                                 es un zoom sobre el ANCHO de toda la pagina: la etiqueta
+                                 entera cambiaba de tamano segun la longitud del codigo. -->
+                            <div class="product_barcode" t-out="barcode_value" style="font-size: .6em; word-break: break-all; padding: 0; margin: 0;"/>
+                            <div t-if="size_val" class="attrib_val_size" t-attf-style="white-space: nowrap; line-height: 0.9; padding: 0; margin: 0; font-weight: bold; font-size: #{'3.4' if len(size_val) &lt;= 2 else '2.6' if len(size_val) &lt;= 4 else '1.8'}em;" t-esc="size_val"/>
                         </td>
                         <!-- Ancho fijo: es lo que hace que el nombre parta dentro de esta
                              columna y no invada la de la talla -->
-                        <td rowspan="2" style="border: 1px solid white; text-align: left; vertical-align: top; width: 65%;">
+                        <td style="border: 1px solid white; text-align: left; vertical-align: top; width: 65%;">
                             <!-- Alineado a la izquierda para separarlo del precio, que va
-                                 a la derecha. Hasta tres lineas: esta columna mide lo que
-                                 midan el codigo y la talla juntos tanto si el nombre las
-                                 usa como si no, asi que salen de espacio que de otro modo
-                                 quedaria en blanco.
+                                 a la derecha. Hasta tres lineas.
                                  El alto se reserva desde Python (_label_name_height):
                                  los caracteres por linea de ese calculo salen del ancho
-                                 de ESTA columna (65% ~ 34mm, unos 15 caracteres), no del
-                                 ancho de la etiqueta. Si se cambia el width del td hay
-                                 que rehacer ese numero, o el texto se recorta en vez de
-                                 pasar a la linea siguiente -->
+                                 de ESTA columna (65% ~ 34mm), no del ancho de la
+                                 etiqueta. Si se cambia el width del td hay que rehacer
+                                 ese numero, o el texto se recorta en vez de pasar a la
+                                 linea siguiente -->
                             <t t-set="name_height" t-value="product.env['product.label.name.fit']._label_name_height(name_val)"/>
                             <div t-if="name_val" class="product_barcode_name" t-attf-style="text-align: left; line-height: 1.05; height: #{name_height}em; overflow: hidden; white-space: normal; word-wrap: break-word; padding: 0; margin: 0;" t-out="name_val"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td rowspan="2" style="border: 1px solid white; text-align: left; vertical-align: top;">
-                            <div t-if="size_val" class="attrib_val_size" t-attf-style="white-space: nowrap; line-height: 0.9; padding: 0; margin-top: 0; font-weight: bold; font-size: #{'3.4' if len(size_val) &lt;= 2 else '2.6' if len(size_val) &lt;= 4 else '1.8'}em;" t-esc="size_val"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid white; text-align: right; vertical-align: bottom;">
-                            <div style="white-space: nowrap; padding: 0; margin: 0;">
+                            <div style="white-space: nowrap; text-align: right; padding: 0; margin: 0;">
                                 <t t-if="product.is_product_variant">
                                     <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block;"/>
                                 </t>
