@@ -75,6 +75,15 @@
                                  entera cambiaba de tamano segun la longitud del codigo. -->
                             <div class="product_barcode" t-out="barcode_value" style="font-size: .6em; word-break: break-all; padding: 0; margin: 0;"/>
                             <div t-if="size_val" class="attrib_val_size" t-attf-style="white-space: nowrap; line-height: 0.9; padding: 0; margin: 0; font-weight: bold; font-size: #{'3.4' if len(size_val) &lt;= 2 else '2.6' if len(size_val) &lt;= 4 else '1.8'}em;" t-esc="size_val"/>
+                            <!-- El color va aqui, bajo la talla, y no debajo de la tabla:
+                                 alli caia donde acabase la columna mas alta, que con tres
+                                 lineas de nombre mas precio ya toca el borde del rollo de
+                                 30mm, y el color salia cortado y empujaba la siguiente
+                                 etiqueta. Bajo la talla sobra alto. La columna es
+                                 estrecha (~24mm), asi que la fuente baja con la longitud
+                                 igual que hace la talla: nowrap sin escalar desbordaria y
+                                 volveria a disparar el encogimiento de wkhtmltopdf -->
+                            <div t-if="color_val" class="attrib_val_color" t-attf-style="text-align: left; white-space: nowrap; overflow: hidden; line-height: 100%; padding: 0; margin: 0; font-size: #{'100' if len(color_val) &lt;= 7 else '80' if len(color_val) &lt;= 10 else '65'}%;" t-esc="color_val"/>
                         </td>
                         <!-- Ancho fijo: es lo que hace que el nombre parta dentro de esta
                              columna y no invada la de la talla -->
@@ -104,9 +113,6 @@
                         </td>
                     </tr>
                 </table>
-                <!-- Margen negativo: la caja de linea del precio (cifra a 2.2em) deja
-                     aire bajo los digitos y el color quedaba demasiado separado de la talla -->
-                <div t-if="color_val" class="attrib_val_color" t-attf-style="text-align: left; white-space: nowrap; overflow: hidden; line-height: 100%; padding: 0; margin-top: -0.3em; font-size: #{'100' if len(color_val) &lt;= 10 else '87'}%;" t-esc="color_val"/>
                 <!-- Optional Extra HTML (currently disabled) -->
                 <div t-if="False" class="o_label_extra_data">
                     <t t-out="extra_html"/>
