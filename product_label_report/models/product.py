@@ -58,10 +58,17 @@ class ProductLabelNameFit(models.AbstractModel):
     # El limite de la columna de al lado no es el codigo -va a .6em y sobra
     # sitio- sino la talla, que es nowrap a 3.4em: si se le quita ancho no se
     # parte, desborda, y vuelve a disparar el encogimiento de wkhtmltopdf.
-    _LABEL_NAME_LINE_UNITS = 14.0
-    # Anchos relativos aproximados. Solo hay que ser mas fino que "todos igual":
-    # el error que importa es el de la palabra ancha que fuerza linea extra.
-    _LABEL_NAME_NARROW = "iljtfrI.,;:'|!()[]-"
+    # Calibrado con doc/etiqueta 3 lineas.jpg: "CAMISA HARPER" (13 mayusculas
+    # y un espacio) llena el 93% de la columna en una sola linea. Con
+    # mayuscula=1.3 eso son 17.4 unidades, de ahi el 18. Con el 14 anterior el
+    # nombre se estimaba en 3 lineas cuando el render hacia 2, y el alto de
+    # sobra estiraba la tabla y empujaba el color a la etiqueta siguiente.
+    _LABEL_NAME_LINE_UNITS = 18.0
+    # Anchos relativos aproximados a Helvetica, con la minuscula media (~0.52em)
+    # como 1.0: mayuscula ~0.68em, digito ~0.56em, espacio ~0.28em. Solo hay
+    # que ser mas fino que "todos igual": el error que importa es el de la
+    # palabra ancha que fuerza linea extra.
+    _LABEL_NAME_NARROW = " iljtfrI.,;:'|!()[]-"
     _LABEL_NAME_WIDE = 'mwMW@%'
     # Techo del presupuesto vertical: mas lineas empujarian la linea del color
     # fuera del rollo. Pasado el techo se recorta, que es el mal menor.
@@ -74,8 +81,10 @@ class ProductLabelNameFit(models.AbstractModel):
             return 0.5
         if char in self._LABEL_NAME_WIDE:
             return 1.6
-        if char.isupper() or char.isdigit():
-            return 1.25
+        if char.isupper():
+            return 1.3
+        if char.isdigit():
+            return 1.05
         return 1.0
 
     @api.model
