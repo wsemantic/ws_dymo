@@ -140,8 +140,24 @@ class ProductLabelNameFit(models.AbstractModel):
         return max(lines, 1)
 
     @api.model
-    def _label_name_height(self, text):
-        """Alto en em a reservar para el nombre, con el techo aplicado."""
+    def _label_name_lines(self, text):
+        """Lineas a reservar para el nombre, con el techo aplicado."""
         lines = self._label_name_line_count(text, self._LABEL_NAME_LINE_UNITS)
-        lines = min(lines, self._LABEL_NAME_MAX_LINES)
-        return round(lines * self._LABEL_NAME_LINE_HEIGHT, 2)
+        return min(lines, self._LABEL_NAME_MAX_LINES)
+
+    @api.model
+    def _label_name_height(self, text):
+        """Alto en em a reservar para el nombre."""
+        return round(self._label_name_lines(text) * self._LABEL_NAME_LINE_HEIGHT, 2)
+
+    @api.model
+    def _label_price_offset(self, text):
+        """Margen extra en em sobre el precio: las lineas del techo que el
+        nombre no usa. El presupuesto vertical del rollo esta calculado para
+        _LABEL_NAME_MAX_LINES, asi que con menos lineas sobra justo ese alto;
+        pasandolo encima del precio, este queda siempre a la misma altura
+        (abajo) y el hueco con el nombre crece en vez de quedar pegado. Es la
+        alternativa a dar alto fijo a la tabla, que es lo que rompia el rollo.
+        """
+        spare = self._LABEL_NAME_MAX_LINES - self._label_name_lines(text)
+        return round(spare * self._LABEL_NAME_LINE_HEIGHT, 2)

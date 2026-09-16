@@ -111,7 +111,12 @@
                                  necesita el rollo de 30 con tres lineas de nombre; -3mm es
                                  el maximo que cabe sin sacar una etiqueta en blanco
                                  (medido con wkhtmltopdf y Lato, ver README) -->
-                            <div style="white-space: nowrap; text-align: right; padding: 0; margin: 0.3em 0 0 0;">
+                            <!-- Al 0.3em se le suman las lineas del techo (3) que el nombre no
+                                 usa (_label_price_offset): el precio queda siempre a la altura
+                                 del caso de 3 lineas, abajo, y con nombres cortos el hueco crece
+                                 en vez de quedar a un pixel. Con 3 lineas el margen es 0.3em -->
+                            <t t-set="price_offset" t-value="product.env['product.label.name.fit']._label_price_offset(name_val)"/>
+                            <div t-attf-style="white-space: nowrap; text-align: right; padding: 0; margin: #{0.3 + price_offset}em 0 0 0;">
                                 <t t-if="product.is_product_variant">
                                     <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block; margin-top: -3mm;"/>
                                 </t>

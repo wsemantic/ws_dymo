@@ -169,6 +169,11 @@ estrecha (~24mm) el color baja de cuerpo con la longitud, igual que la talla.
 
 El alto del nombre se reserva desde Python (`product.label.name.fit`), que
 simula el ajuste de línea por palabras con anchos aproximados por carácter.
+Las líneas del techo (3) que el nombre no usa se pasan como margen **encima**
+del precio (`_label_price_offset`): el precio queda siempre a la misma altura,
+abajo, y un nombre corto deja hueco en vez de quedar pegado. Es la alternativa
+a dar alto fijo a la tabla o centrar el precio en su celda: la celda no tiene
+alto sobrante que repartir, el hueco está fuera de la tabla.
 
 `table-layout: fixed` es **imprescindible**: en modo `auto` el `width` del `td` es
 solo una sugerencia y la tabla ensancha la columna para no partir el texto, con lo
@@ -181,7 +186,8 @@ que el nombre se queda en una línea y se recorta.
 | El nombre se recorta / salta de línea sin usarla | `_LABEL_NAME_LINE_UNITS` y los anchos por carácter en `models/product.py`. Recalibrar con una muestra impresa |
 | Se cambia el `width: 65%` del `td` del nombre | **Rehacer `_LABEL_NAME_LINE_UNITS`**: está calibrado para ese ancho (~34mm) |
 | Se cambia el `line-height` del nombre | Cambiarlo también en `_LABEL_NAME_LINE_HEIGHT`; van a la par |
-| El precio roza el nombre | `margin-top: -3mm` inline del `strong` del precio (neutraliza el −5mm de core). Subirlo hacia 0 cuesta rollo: −2mm ya saca etiqueta en blanco con 3 líneas |
+| El precio roza el nombre | Solo puede pasar con 3 líneas: `margin-top: -3mm` inline del `strong` (neutraliza el −5mm de core). Subirlo hacia 0 cuesta rollo: −2mm ya saca etiqueta en blanco. Con menos líneas el hueco lo pone `_label_price_offset` |
+| El precio baila de altura entre etiquetas | No debería: `_label_price_offset` lo ancla a la altura del caso de 3 líneas. Si baila, el estimador está contando distinto de lo que renderiza |
 | El color desborda su columna | Umbrales de longitud del `div.attrib_val_color` |
 | La talla se aprieta | Bajar el `width: 65%` |
 | El código de barras roza por arriba | `margin_top` del paperformat, no la plantilla: es alineación de *esa* impresora |
