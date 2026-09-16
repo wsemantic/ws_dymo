@@ -83,6 +83,12 @@ class ProductLabelNameFit(models.AbstractModel):
     # de cada base (Lato, en la que se pisaba, los tiene mas largos que
     # Helvetica). Ha de coincidir con el line-height del div en la plantilla.
     _LABEL_NAME_LINE_HEIGHT = 1.2
+    # Que parte de las lineas que el nombre no usa se pasa como hueco encima
+    # del precio. Con 1.0 el precio queda siempre a la altura del caso de 3
+    # lineas, a 1pt del borde util del rollo de 30: cualquier desalineacion de
+    # la impresora lo recorta. Con 0.5 un nombre de una linea deja una linea de
+    # hueco y el precio sube ~10pt del borde; con dos lineas, media.
+    _LABEL_PRICE_SPARE_RATIO = 0.5
 
     @api.model
     def _label_name_char_width(self, char):
@@ -152,12 +158,12 @@ class ProductLabelNameFit(models.AbstractModel):
 
     @api.model
     def _label_price_offset(self, text):
-        """Margen extra en em sobre el precio: las lineas del techo que el
-        nombre no usa. El presupuesto vertical del rollo esta calculado para
-        _LABEL_NAME_MAX_LINES, asi que con menos lineas sobra justo ese alto;
-        pasandolo encima del precio, este queda siempre a la misma altura
-        (abajo) y el hueco con el nombre crece en vez de quedar pegado. Es la
+        """Margen extra en em sobre el precio: parte de las lineas del techo
+        que el nombre no usa. El presupuesto vertical del rollo esta calculado
+        para _LABEL_NAME_MAX_LINES, asi que con menos lineas sobra ese alto;
+        pasando una parte encima del precio, el hueco con el nombre crece en
+        vez de quedar pegado, sin llevar el precio al borde del rollo. Es la
         alternativa a dar alto fijo a la tabla, que es lo que rompia el rollo.
         """
         spare = self._LABEL_NAME_MAX_LINES - self._label_name_lines(text)
-        return round(spare * self._LABEL_NAME_LINE_HEIGHT, 2)
+        return round(spare * self._LABEL_PRICE_SPARE_RATIO * self._LABEL_NAME_LINE_HEIGHT, 2)
