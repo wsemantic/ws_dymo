@@ -58,7 +58,7 @@ class ProductLabelNameFit(models.AbstractModel):
     # El limite de la columna de al lado no es el codigo -va a .6em y sobra
     # sitio- sino la talla, que es nowrap a 3.4em: si se le quita ancho no se
     # parte, desborda, y vuelve a disparar el encogimiento de wkhtmltopdf.
-    # Calibrado con doc/Etiqueta tirantes sin econgimiento.pdf (rollo de 30mm,
+    # Calibrado sobre el PDF sin encogimiento del rollo de 30mm (sept 2026,
     # Lato): "TIRANTES BOTONES" (19.2 unidades con los pesos de abajo) ocupa el
     # 90.5% de la columna medido con pdftotext -bbox, luego la columna real son
     # ~21.2 unidades; se deja un 3% por debajo para que el error, si lo hay,
