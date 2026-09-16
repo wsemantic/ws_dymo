@@ -96,10 +96,38 @@ sobre 1.7em) sobresale por arriba de su propia caja de línea.
 
 **Contar mayúsculas a 1.25 unidades con 14 por línea.** Estimaba 3 líneas para
 un nombre que el render hacía en 2, y el alto reservado de más estiraba la
-tabla. Medido sobre una etiqueta real: 13 mayúsculas más un espacio llenan el
-93% de la columna. Las proporciones actuales de `product.py` (mayúscula 1.3,
-dígito 1.05, espacio 0.5, 18 unidades por línea) salen de esa medida. Si se
-recalibra, hacerlo con una muestra impresa, no a ojo.
+tabla. Se recalibró a 18 con una foto de "CAMISA HARPER", pero esa foto era de
+una versión con la columna del nombre más estrecha, y volvió a estimar 3 líneas
+donde el render hacía 2 ("TIRANTES BOTONES LUNARES"). El valor actual (20,5)
+sale de **medir el PDF**, no de una foto: `pdftotext -bbox` da la x de cada
+palabra, y "TIRANTES BOTONES" (19,2 unidades) ocupa el 90,5% de la columna.
+Si se recalibra, hacerlo así: PDF sin encogimiento, `pdftotext -bbox`, y ancho
+de una línea llena entre ancho de columna. `pdffonts` sobre el mismo PDF dice
+además qué fuente ha usado wkhtmltopdf de verdad.
+
+**Subir el `margin-top` del precio a 0.5em.** Parecía la palanca cuando el
+precio se pisaba con un nombre de una línea, pero con dos líneas de nombre la
+caja del precio acababa en 87pt sobre una página de 85 (30mm) y salía una
+etiqueta en blanco detrás. Con 0.3em queda en 84,9: no hay margen vertical que
+subir en el rollo de 30.
+
+**Subir el `margin-top` del precio (0.3em → 0.5em) cuando se pisaba con un
+nombre de una línea.** Con dos líneas de nombre el precio acababa fuera de la
+página de 85pt (30mm) y salía una etiqueta en blanco detrás. Y no era la causa:
+el precio no baja porque **core inyecta al final del informe** un `<style>` con
+`.o_label_price_medium { margin-top: -5mm }` que lo sube por encima de la caja
+del nombre. Solo se notaba cuando la última línea del nombre llegaba hasta el
+borde derecho ("TRAJE PURO 47800"); con una última línea corta ("LUNARES") no se
+cruzaban horizontalmente y parecía bien. Se neutraliza con `margin-top: -3mm`
+inline en el `strong` (inline gana a esa regla). No puede ser 0: con tres
+líneas de nombre el precio acabaría en 81pt de 79 útiles. Medido con
+wkhtmltopdf y Lato: −3mm deja 5pt entre nombre y precio y 78pt de fondo.
+
+**Sospechar del estimador de líneas ante ese mismo síntoma.** La hipótesis era
+que el render partía "TRAJE PURO 47800" en dos líneas y la segunda, que el
+`overflow: hidden` del `td` no recorta, caía sobre el precio. El PDF lo
+desmintió: una sola línea. Antes de recalibrar, comprobar en el PDF si el texto
+de la supuesta segunda línea existe.
 
 **`header_spacing` del paperformat.** No hace nada: wkhtmltopdf solo lo aplica si
 el informe tiene cabecera, y este no la tiene. El valor 30 que trae es el que
@@ -153,7 +181,7 @@ que el nombre se queda en una línea y se recorta.
 | El nombre se recorta / salta de línea sin usarla | `_LABEL_NAME_LINE_UNITS` y los anchos por carácter en `models/product.py`. Recalibrar con una muestra impresa |
 | Se cambia el `width: 65%` del `td` del nombre | **Rehacer `_LABEL_NAME_LINE_UNITS`**: está calibrado para ese ancho (~34mm) |
 | Se cambia el `line-height` del nombre | Cambiarlo también en `_LABEL_NAME_LINE_HEIGHT`; van a la par |
-| El precio roza el nombre | `margin-top` del `div` del precio (0.3em) |
+| El precio roza el nombre | `margin-top: -3mm` inline del `strong` del precio (neutraliza el −5mm de core). Subirlo hacia 0 cuesta rollo: −2mm ya saca etiqueta en blanco con 3 líneas |
 | El color desborda su columna | Umbrales de longitud del `div.attrib_val_color` |
 | La talla se aprieta | Bajar el `width: 65%` |
 | El código de barras roza por arriba | `margin_top` del paperformat, no la plantilla: es alineación de *esa* impresora |
@@ -185,6 +213,24 @@ asistente. `TEMPLATE_ID` debe ser un `product.template` (esa rama hace `browse`
 sobre ese modelo), no un `product.product`.
 
 Cinco minutos con esto ahorran una tarde de conjeturas.
+
+**Reproducir el render en local.** Guardar ese `html` a fichero, descargar el
+CSS que enlaza (`/web/assets/.../web.report_assets_common.min.css`, con sesión
+iniciada), apuntar el `<link>` al fichero local y lanzar:
+
+```
+wkhtmltopdf --page-width 57mm --page-height 30mm -T 2 -B 2 -L 2 -R 2 \
+  --dpi 96 --enable-local-file-access traje.html out.pdf
+pdftotext -bbox out.pdf -      # posicion de cada palabra
+pdffonts out.pdf               # fuente que ha usado de verdad
+pdftoppm -r 300 -png out.pdf   # verlo
+```
+
+Hace falta tener instalada la misma fuente (`fonts-lato`). Con qt sin parchear
+sale escalado a ~0,8: comparar proporciones, no valores absolutos. Así se
+encontró el `margin-top: -5mm` que core mete en un `<style>` al final del HTML
+y que no aparece en ningún SCSS. Mirar siempre el HTML completo, incluido el
+final.
 
 ## Presupuesto vertical (rollo de 30mm)
 

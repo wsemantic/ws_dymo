@@ -101,13 +101,22 @@
                             <!-- Margen superior: la cifra (.oe_currency_value a 1.3em sobre
                                  los 1.7em del strong) sobresale por arriba de su caja de
                                  linea y sin este hueco se monta sobre la ultima linea del
-                                 nombre cuando el texto llega hasta el precio -->
+                                 nombre cuando el texto llega hasta el precio.
+                                 El margin-top: -3mm del strong no es nuestro: core inyecta
+                                 al final del informe un <style> con
+                                 .o_label_price_medium { margin-top: -5mm } que sube el
+                                 precio por encima de la caja del nombre (se veia con
+                                 nombres de una linea que llegan al borde derecho). Al ir
+                                 inline gana a esa regla. No puede ser 0: esos mm los
+                                 necesita el rollo de 30 con tres lineas de nombre; -3mm es
+                                 el maximo que cabe sin sacar una etiqueta en blanco
+                                 (medido con wkhtmltopdf y Lato, ver README) -->
                             <div style="white-space: nowrap; text-align: right; padding: 0; margin: 0.3em 0 0 0;">
                                 <t t-if="product.is_product_variant">
-                                    <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block;"/>
+                                    <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block; margin-top: -3mm;"/>
                                 </t>
                                 <t t-else="">
-                                    <strong class="o_label_price_medium" t-field="product.list_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block;"/>
+                                    <strong class="o_label_price_medium" t-field="product.list_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block; margin-top: -3mm;"/>
                                 </t>
                             </div>
                         </td>
