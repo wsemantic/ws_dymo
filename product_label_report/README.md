@@ -169,6 +169,9 @@ estrecha (~24mm) el color baja de cuerpo con la longitud, igual que la talla.
 
 El alto del nombre se reserva desde Python (`product.label.name.fit`), que
 simula el ajuste de línea por palabras con anchos aproximados por carácter.
+Lo que no cabe en 3 líneas se **recorta también en Python** (`_label_name_fit`,
+con "…"): el `overflow: hidden` del div no recorta de forma fiable dentro del
+`td` y una cuarta línea caería sobre el precio.
 La mitad de las líneas del techo (3) que el nombre no usa se pasa como margen
 **encima** del precio (`_label_price_offset`, `_LABEL_PRICE_SPARE_RATIO`): un
 nombre corto deja hueco en vez de quedar pegado. Es la alternativa a dar alto
@@ -189,7 +192,8 @@ que el nombre se queda en una línea y se recorta.
 | El nombre se recorta / salta de línea sin usarla | `_LABEL_NAME_LINE_UNITS` y los anchos por carácter en `models/product.py`. Recalibrar con una muestra impresa |
 | Se cambia el `width: 65%` del `td` del nombre | **Rehacer `_LABEL_NAME_LINE_UNITS`**: está calibrado para ese ancho (~34mm) |
 | Se cambia el `line-height` del nombre | Cambiarlo también en `_LABEL_NAME_LINE_HEIGHT`; van a la par |
-| El precio roza el nombre | Solo puede pasar con 3 líneas: `margin-top: -3mm` inline del `strong` (neutraliza el −5mm de core). Subirlo hacia 0 cuesta rollo: −2mm ya saca etiqueta en blanco. Con menos líneas el hueco lo pone `_label_price_offset` |
+| El precio roza el nombre | Solo puede pasar con 3 líneas: `margin-top: -2.3mm` inline del `strong` (neutraliza el −5mm de core). Subirlo hacia 0 cuesta rollo: cada 0,5mm es una etiqueta en blanco con 3 líneas. Con menos líneas el hueco lo pone `_label_price_offset` |
+| Sale una etiqueta en blanco detrás (nombre de 3 líneas) | Ya no queda de dónde rascar: barras a 7mm, `line-height: 1` en el precio y −2.3mm dan ~2pt de holgura. El cuerpo del precio no se puede bajar (core lo fija con `!important`). Siguiente paso sería techo de 2 líneas |
 | El precio queda pegado al nombre con nombres cortos, o demasiado abajo | `_LABEL_PRICE_SPARE_RATIO` (0.5): 1.0 lo ancla abajo del todo, 0 lo pega al nombre |
 | El color desborda su columna | Umbrales de longitud del `div.attrib_val_color` |
 | La talla se aprieta | Bajar el `width: 65%` |
@@ -247,7 +251,7 @@ final.
 
 | Elemento | Alto |
 |---|---|
-| Barras | 7,5mm (fijo, `barcode_size` de core) |
+| Barras | 7mm (`barcode_size`, redefinido desde los 7,5 de core) |
 | Código + nombre + talla + precio | ~13mm |
 | Color | ~2,4mm |
 

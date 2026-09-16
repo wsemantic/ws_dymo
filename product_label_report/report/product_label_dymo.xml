@@ -18,7 +18,15 @@
                  etiqueta no). Al ser inline ganaba a todo el scss. -->
             <div class="o_label_full" style="width: 100%; max-height: 100%; overflow: hidden;">
                 <t t-set="barcode_value" t-value="barcode or product.barcode"/>
-                <t t-set="name_val" t-value="product.name or ''"/>
+                <!-- Core pone 45.5x7.5mm. Medio milimetro menos de barras: en el rollo
+                     de 30 con Lato, tres lineas de nombre mas el precio acababan a
+                     79.8pt de 79.3 utiles y salia una etiqueta en blanco detras.
+                     Junto con el line-height del precio da ~2pt de holgura -->
+                <t t-set="barcode_size" t-value="'width:45.5mm;height:7mm'"/>
+                <!-- Recortado en Python a 3 lineas (_label_name_fit): el overflow del
+                     div no es fiable dentro del td y una cuarta linea caeria sobre el
+                     precio -->
+                <t t-set="name_val" t-value="product.env['product.label.name.fit']._label_name_fit(product.name)"/>
                 <!-- Nombre sin los valores de variante ni codigo interno: el codigo ya va
                      bajo las barras en pequeno, y color y talla se imprimen aparte.
                      El nombre ya no acompana al codigo aqui: iba en una sola linea sin
@@ -108,8 +116,12 @@
                                  precio por encima de la caja del nombre (se veia con
                                  nombres de una linea que llegan al borde derecho). Al ir
                                  inline gana a esa regla. No puede ser 0: esos mm los
-                                 necesita el rollo de 30 con tres lineas de nombre; -3mm es
-                                 el maximo que cabe sin sacar una etiqueta en blanco
+                                 necesita el rollo de 30 con tres lineas de nombre.
+                                 line-height: 1 porque con normal Lato reserva 23pt de
+                                 caja para 19pt de cifra, casi todo aire debajo; encoge la
+                                 caja 4pt pero sube la cifra 2, y el margen pasa de -3 a
+                                 -2.3mm para dejar la cifra donde estaba. El font-size no
+                                 se puede tocar: core lo fija con !important
                                  (medido con wkhtmltopdf y Lato, ver README) -->
                             <!-- Al 0.3em se le suma la mitad de las lineas del techo (3) que el
                                  nombre no usa (_label_price_offset): con nombres cortos el hueco
@@ -118,10 +130,10 @@
                             <t t-set="price_offset" t-value="product.env['product.label.name.fit']._label_price_offset(name_val)"/>
                             <div t-attf-style="white-space: nowrap; text-align: right; padding: 0; margin: #{0.3 + price_offset}em 0 0 0;">
                                 <t t-if="product.is_product_variant">
-                                    <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block; margin-top: -3mm;"/>
+                                    <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block; margin-top: -2.3mm; line-height: 1;"/>
                                 </t>
                                 <t t-else="">
-                                    <strong class="o_label_price_medium" t-field="product.list_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block; margin-top: -3mm;"/>
+                                    <strong class="o_label_price_medium" t-field="product.list_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block; margin-top: -2.3mm; line-height: 1;"/>
                                 </t>
                             </div>
                         </td>

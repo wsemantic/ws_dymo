@@ -152,6 +152,28 @@ class ProductLabelNameFit(models.AbstractModel):
         return min(lines, self._LABEL_NAME_MAX_LINES)
 
     @api.model
+    def _label_name_fit(self, text):
+        """Texto recortado a lo que cabe en _LABEL_NAME_MAX_LINES, con puntos
+        suspensivos. Se recorta aqui y no con overflow: dentro de un td
+        wkhtmltopdf no recorta de forma fiable y la cuarta linea acabaria
+        sobre el precio. Se corta por palabras, y la ultima se acorta hasta
+        que quepa con la elipsis."""
+        text = ' '.join((text or '').split())
+        units = self._LABEL_NAME_LINE_UNITS
+        if self._label_name_line_count(text, units) <= self._LABEL_NAME_MAX_LINES:
+            return text
+        words = text.split()
+        while words:
+            candidate = ' '.join(words) + '…'
+            if self._label_name_line_count(candidate, units) <= self._LABEL_NAME_MAX_LINES:
+                return candidate
+            if len(words[-1]) > 1:
+                words[-1] = words[-1][:-1]
+            else:
+                words.pop()
+        return '…'
+
+    @api.model
     def _label_name_height(self, text):
         """Alto en em a reservar para el nombre."""
         return round(self._label_name_lines(text) * self._LABEL_NAME_LINE_HEIGHT, 2)
