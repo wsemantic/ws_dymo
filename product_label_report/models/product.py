@@ -58,12 +58,18 @@ class ProductLabelNameFit(models.AbstractModel):
     # El limite de la columna de al lado no es el codigo -va a .6em y sobra
     # sitio- sino la talla, que es nowrap a 3.4em: si se le quita ancho no se
     # parte, desborda, y vuelve a disparar el encogimiento de wkhtmltopdf.
-    # Calibrado con doc/etiqueta 3 lineas.jpg: "CAMISA HARPER" (13 mayusculas
-    # y un espacio) llena el 93% de la columna en una sola linea. Con
-    # mayuscula=1.3 eso son 17.4 unidades, de ahi el 18. Con el 14 anterior el
-    # nombre se estimaba en 3 lineas cuando el render hacia 2, y el alto de
-    # sobra estiraba la tabla y empujaba el color a la etiqueta siguiente.
-    _LABEL_NAME_LINE_UNITS = 18.0
+    # Calibrado con doc/Etiqueta tirantes sin econgimiento.pdf (rollo de 30mm,
+    # Lato): "TIRANTES BOTONES" (19.2 unidades con los pesos de abajo) ocupa el
+    # 90.5% de la columna medido con pdftotext -bbox, luego la columna real son
+    # ~21.2 unidades; se deja un 3% por debajo para que el error, si lo hay,
+    # sea reservar de mas y no que una linea sin reservar caiga sobre el
+    # precio. El 18 anterior salia de una foto de "CAMISA HARPER" tomada con la
+    # columna del nombre mas estrecha (antes de independizar las dos columnas)
+    # y estimaba 3 lineas para nombres que el render hacia en 2.
+    # Para recalibrar: generar el PDF sin encogimiento, pdftotext -bbox, y
+    # dividir el ancho de una linea llena entre el ancho de la columna
+    # (x del primer texto de la columna hasta ~154pt en pagina de 161pt).
+    _LABEL_NAME_LINE_UNITS = 20.5
     # Anchos relativos aproximados a Helvetica, con la minuscula media (~0.52em)
     # como 1.0: mayuscula ~0.68em, digito ~0.56em, espacio ~0.28em. Solo hay
     # que ser mas fino que "todos igual": el error que importa es el de la
