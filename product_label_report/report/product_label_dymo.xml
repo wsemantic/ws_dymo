@@ -102,7 +102,7 @@
                                  los 1.7em del strong) sobresale por arriba de su caja de
                                  linea y sin este hueco se monta sobre la ultima linea del
                                  nombre cuando el texto llega hasta el precio -->
-                            <div style="white-space: nowrap; text-align: right; padding: 0; margin: 0.3em 0 0 0;">
+                            <div style="white-space: nowrap; text-align: right; padding: 0; margin: 0.5em 0 0 0;">
                                 <t t-if="product.is_product_variant">
                                     <strong class="o_label_price_medium" t-field="product.lst_price" t-options="{'widget': 'monetary', 'label_price': True}" style="font-size: 1.7em; display: inline-block;"/>
                                 </t>
